@@ -1,0 +1,9 @@
+{
+  "font_size": 60,
+  "labels": [
+    {"word": "cat",       "anchor": [545, 195], "pill": [545, 90]},
+    {"word": "ant",       "anchor": [693, 300], "pill": [885, 295]},
+    {"word": "bed",       "anchor": [840, 470], "pill": [1010, 470]},
+    {"word": "alligator", "anchor": [395, 555], "pill": [395, 700]}
+  ]
+}
