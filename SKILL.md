@@ -1,5 +1,19 @@
 ---
 name: english-preschool-materials
+slug: english-preschool-materials
+version: 1.0.1
+displayName: 英语幼教素材批量生成器
+summary: 一份 Excel 词表，批量生成 kawaii 英语单词闪卡与歌谣场景插图
+author: archer860710
+license: MIT
+homepage: https://github.com/archer860710/english-preschool-materials
+tags:
+  - 单词卡
+  - 闪卡
+  - 英语启蒙
+  - 幼教
+  - chant
+  - 场景插图
 description: 英语幼教素材批量生成器（两条流水线）：① 单词闪卡——按 xlsx 三列（英文单词 / 重点字母 / 中文释义）批量生成 kawaii 扁平风插画单词卡并导出 PNG；② Chant 场景插图——按歌词生成横版多角色场景图，并把单词表中的词以橙色胶囊标注到图上。当用户提到：单词卡、闪卡、flashcard、英语单词卡、学龄前英语素材、chant、歌谣插图、场景配图时使用。适用于 WorkBuddy 等具备文生图能力的 Agent 环境，核心提示词模板与排版规格同样适用于任何 AI 生图工作流。
 ---
 
@@ -191,7 +205,7 @@ no contour line, small closed smile curve, no teeth, no open mouth
 | `scripts/chant_components.py` | 标注组件（胶囊 / 引线绘制） | Pillow |
 | `assets/fonts/baloo2-extrabold.ttf` | 标注与卡片文字字体 | — |
 
-> 本仓库随附 `scripts/` 与字体；若从零搭建，按 §6/§7 的步骤与参数自行实现即可，规格全部在本文档内。
+> 若发布包未随附字体与示例图（部分技能平台不接受二进制资源文件），按 §1.4 自行获取字体即可；脚本参数与全部规格都在本文档内，可从零实现。
 
 ---
 
