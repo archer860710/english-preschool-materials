@@ -5,6 +5,7 @@
 单词 Baloo2 ExtraBold 320px #33322E 基线 y=2348 居中, 字距 -2px
 徽章 520x260 @(820,2420) r130 #FF7A45, 白字 160px 居中
 """
+import os
 import sys
 from PIL import Image, ImageDraw, ImageFont
 
@@ -97,7 +98,9 @@ def main(word, illus_path):
     d.text(((BADGE[0] + BADGE[2]) / 2, (BADGE[1] + BADGE[3]) / 2), sys.argv[3] if len(sys.argv) > 3 else "Ee",
            font=f_badge, fill=(255, 255, 255, 255), anchor="mm")
 
-    out = f"card-exports/单词卡-{word}.png"
+    out_dir = os.path.join("card-exports", "单词（带字母）")
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, f"单词卡-{word}.png")
     card.save(out)
     print("saved", out, card.size)
 

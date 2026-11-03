@@ -1,7 +1,7 @@
 ---
 name: english-preschool-materials
 slug: english-preschool-materials
-version: 1.0.1
+version: 2.0.0
 displayName: 英语幼教素材批量生成器
 summary: 一份 Excel 词表，批量生成 kawaii 英语单词闪卡与歌谣场景插图
 author: archer860710
@@ -25,10 +25,10 @@ description: 英语幼教素材批量生成器（两条流水线）：① 单词
 
 | | 流水线 A：单词闪卡 | 流水线 B：Chant 场景插图 |
 |---|---|---|
-| 数据源 | `单词.xlsx`（A 英文 / B 重点 / C 中文） | `Chant.xlsx`（A 歌词 / B 备注） |
-| 产出 | 1080×1440 竖版卡 → `card-exports/` | 1536×1024 横版场景图 → `generated-images/chant/` |
-| 画面 | 单一主体，禁止任何配角与场景 | 多角色场景（谁在床上 / 床下等） |
-| 文字 | 单词 + 重点字母徽章 | 底图无字，后期合成单词胶囊标注 |
+| 数据源 | `单词.xlsx` 双 Sheet：「带字母」= A 英文/B 重点字母/C 中文；「不带字母」= A 英文/B 画面内容（→ 不带字母卡） | `Chant.xlsx`（A 歌词 / B 备注） |
+| 产出 | 1080×1440 竖版卡 → `card-exports/单词（带字母）/` 或 `card-exports/单词（不带字母）/` | 1536×1024 横版场景图 → 过程图留 `generated-images/chant/`，交付图复制到 `card-exports/chant/` |
+| 画面 | 单一主体，按对应 Sheet 的内容列绘制，禁止任何配角与场景 | 多角色场景（谁在床上 / 床下等） |
+| 文字 | 带字母版：单词 + 重点字母徽章；不带字母版：仅单词 | 底图无字，后期合成单词胶囊标注 |
 
 ---
 
@@ -36,12 +36,16 @@ description: 英语幼教素材批量生成器（两条流水线）：① 单词
 
 ### 1.1 准备数据源
 
-`单词.xlsx`（Sheet1）三列，第 1 行为表头：
+`单词.xlsx` 支持双 Sheet（按 Sheet 分流到不同卡型）：
+
+- **「带字母」**：三列，第 1 行为表头——
 
 | A 列：单词 | B 列：重点字母 | C 列：插画内容参考 |
 |---|---|---|
 | apple | Aa | 苹果 |
 | cup | Cc | 茶杯 |
+
+- **「不带字母」**：两列——A 列单词，B 列**画面内容描述**（仅作为画什么的语义参考，绝不印上卡，也**严禁反过来改写 A 列**）。此 Sheet 走「不带字母卡」卡型（见 §6.5），卡片无徽章。
 
 `Chant.xlsx`（Sheet1）两列：A 列歌词（一行一条），B 列备注（可选）。
 
@@ -53,9 +57,12 @@ description: 英语幼教素材批量生成器（两条流水线）：① 单词
 ├── Chant.xlsx
 ├── assets/fonts/              # Baloo 2 字体（见 1.4）
 ├── scripts/                   # 合成脚本（见 §6）
-├── generated-images/          # 生图原图与 subject-* 角色底图
-│   └── chant/                 # Chant 场景图
-└── card-exports/              # 成品卡片 PNG
+├── generated-images/          # 生图原图与 subject-* 角色底图（过程产物）
+│   └── chant/                 # Chant 场景图过程版
+└── card-exports/              # 最终交付（只放这里）
+    ├── 单词（带字母）/         # 带字母卡 PNG
+    ├── 单词（不带字母）/       # 数字卡等无徽章卡 PNG
+    └── chant/                 # 标注完成的 Chant 场景图
 ```
 
 ### 1.3 能力要求
@@ -148,13 +155,45 @@ no contour line, small closed smile curve, no teeth, no open mouth
 1. 生成主体插画（串行生成，一次一张，存 `generated-images/batch-<word>/`）
 2. 出图后**逐张查看验证**内容与单词对应，再复制为 `generated-images/subject-<word>.png` 统一命名（这批图同时是流水线 B 的角色底图）
 3. 合成卡片：`python scripts/card_compose.py <word> <illus.png> <Aa>`
-   - 输出 2160×2880（2x），落 `card-exports/单词卡-<word>.png`
+   - 输出 2160×2880（2x），落 `card-exports/单词（带字母）/单词卡-<word>.png`（不带字母卡落 `card-exports/单词（不带字母）/`）
    - 合成前自动抹除生图水印（若有，见 §8.1）
 4. 每 10 张抽查 1 张成品
 
 ### 有画布 / 设计工具时的可选链路
 
 若环境提供设计画布（如 WorkBuddy Ardot）：create_design（每卡独立文件）→ 上传图片资源 → 插入卡片 frame、插画 panel、单词 text、徽章 → 贴图 → 导出 PNG。排版参数同 §5。注意：**画布内直接生图易卡死占位图，生图务必走独立通道**。
+
+---
+
+## 6.5 不带字母卡（「不带字母」Sheet）
+
+卡片 = 插画 + 单词，**无徽章**。**插画画什么由 B 列决定**（B 列是画面内容描述，仅语义参考）：B 列写物体就画物体，写数量词就画拟人化数字（见下方子案例）。A 列单词逐字符照抄上卡，严禁根据 B 列反改。
+
+排版（2x 导出 2160×2880）：
+
+| 元素 | 规格 |
+|---|---|
+| 画布 | 2160 × 2880 圆角 96，底色 `#FFF9F0` |
+| 插画区 | 1920 × 2080 @ (120, 120)，圆角 72（1x: 960×1040 @ (60,60)，比带字母版高） |
+| 单词 | Baloo 2 ExtraBold 320px，`#33322E`，基线 y=2668 居中，字距 -2px |
+| 徽章 | **无** |
+
+### 子案例：数量词（B 列 = one–ten 等）
+
+插画主体 = 带 dot eyes + smile + 腮红的卡通数字本身（「画面无文字」硬约束的明示例外——数字是画面主角，但除它之外仍禁一切文字）。生图要点（提示词模板沿用 §4.1）：
+
+- 主体写 `cute smiling cartoon numeral X`，每个数字指定一种颜色（珊瑚红/橙/金黄/绿/天蓝/靛蓝/紫/粉/青），成套更活泼
+- **10 = 两个数字并排**：写明 `composed of exactly TWO digits side by side WITHOUT overlapping`，否则 0 容易压在 1 上
+- **6/9 容易倒置**：6 写明 `closed loop at the BOTTOM`，9 写明 `closed loop at the TOP`
+- 禁词写 `no OTHER numbers, no other digits, no text, no words`（注意不是笼统的 no numbers——数字本身要画）
+- 8 容易长水滴装饰 → 显式加 `no water drops, no droplets`
+
+### 合成（两种子场景通用）
+
+单主体（数字、物体皆可）：`python scripts/card_compose_count.py <word> 1 <subject.png>`（脚本名带 count 是历史名，`N=1` 即单个主体居中；HSV 抠图清纸纹/渐晕/阴影，底色随素材自动适配；`N>1` 保留网格排布能力）
+
+- 素材每个主体一张，存 `generated-images/subject-*.png`（数字已备 `subject-digit-{1..10}.png`）
+- 已知小瑕疵可接受：抠图会把主体内部浅色高光/腮红镂空成底色（如 six 的腮红变白斑），属 kawaii 可爱风正常范围
 
 ---
 
@@ -200,6 +239,7 @@ no contour line, small closed smile curve, no teeth, no open mouth
 | 脚本 | 用途 | 依赖 |
 |---|---|---|
 | `scripts/card_compose.py` | 单词卡本地合成（含去水印） | Pillow |
+| `scripts/card_compose_count.py` | 数字卡/单主体卡合成（HSV 抠图 + 网格排布，`N=1` 即单主体居中） | Pillow、numpy |
 | `scripts/chant_annotate_auto.py` | Chant 场景图单词胶囊标注 | Pillow、numpy |
 | `scripts/chant_analyze.py` | 场景图主体定位分析 | Pillow、numpy |
 | `scripts/chant_components.py` | 标注组件（胶囊 / 引线绘制） | Pillow |
